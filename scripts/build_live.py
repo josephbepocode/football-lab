@@ -17,10 +17,14 @@ def norm(s):
 ALIAS = {'atleticomadrid': 'atleticomadrid', 'athleticbilbao': 'athletic', 'athleticclub': 'athletic', 'celta': 'celtavigo',
          'deportivolacoruna': 'deportivo', 'rayo': 'rayovallecano', 'racingsantander': 'racingsantander'}
 def jdump(p, o):
-    try: old = json.load(open(p))
+    import subprocess
+    # compare with the committed version, so a run that only changes timestamps leaves the file untouched
+    r = subprocess.run(['git', 'show', 'HEAD:' + p], capture_output=True, text=True)
+    try: old = json.loads(r.stdout) if r.returncode == 0 else None
     except Exception: old = None
-    strip = lambda x: {k: v for k, v in x.items() if k != 'updated'} if isinstance(x, dict) else x
-    if strip(old) == strip(o): return
+    strip = lambda x: {k: v for k, v in x.items() if k not in ('updated', 'built')} if isinstance(x, dict) else x
+    if strip(old) == strip(o):
+        open(p, 'w').write(r.stdout); return
     json.dump(o, open(p, 'w'), ensure_ascii=False, separators=(',', ':'))
 PREV = (lambda: json.load(open('data/live/meta.json')).get('updated') if os.path.exists('data/live/meta.json') else None)()
 d = json.load(open(PATH)); teams = d['teams']
