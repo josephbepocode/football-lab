@@ -147,3 +147,8 @@ select:focus,.input:focus{border-color:var(--acc)}select option{background:#1114
   .mrow{grid-template-columns:40px 1fr 92px 1fr 40px;gap:6px;font-size:12px}.hero-stats{gap:20px}.hero-stats div b{font-size:22px}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.upd{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--mute);margin:0 0 14px;font-size:12px}.upd a{color:var(--text);text-decoration:underline}
+.chip.hist{color:#ffd35e;border-color:rgba(255,211,94,.45)}
+.png-btn{position:absolute;top:14px;right:14px;z-index:2;font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid var(--line2);background:rgba(255,255,255,.05);color:var(--mute);cursor:pointer}.png-btn:hover{color:var(--text);border-color:var(--acc)}
+.goals{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px;font-size:14px}.goals b{font-family:var(--fm);color:var(--acc);margin-right:6px}
+a.res{color:inherit;text-decoration:none}a.res:hover{border-color:var(--line2)}

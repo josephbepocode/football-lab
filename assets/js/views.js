@@ -31,7 +31,7 @@ export async function home() {
       <p class="kicker">Six leagues · tables · shot maps · percentiles</p>
       <h1>Football,<br><em>measured.</em></h1>
       <p class="lead">An analytics lab for La Liga, Bundesliga, Serie A, Ligue 1, Eredivisie and Liga Portugal. Live tables and form from open results data, and event-level shot maps and percentile profiles from StatsBomb's open data.</p>
-      <div class="hero-cta"><a class="btn primary" href="#/league/es/2026-27">Explore the leagues →</a><a class="btn" href="#/compare">Compare players</a><a class="btn" href="#/about">How it's built</a></div>
+      <div class="hero-cta"><a class="btn primary" href="#/league/es/2026-27">Explore the leagues →</a><a class="btn" href="#/barca">Barça post-match</a><a class="btn" href="#/clasico-2015">Clásico 2015 shot map</a><a class="btn" href="#/compare">Compare players</a><a class="btn" href="#/about">How it's built</a></div>
       <div class="hero-stats">
         <div><b data-count="${played}">0</b><span>real results, 2025/26 + 2026/27</span></div>
         <div><b data-count="${shots}">0</b><span>real shots with xG</span></div>
@@ -318,6 +318,7 @@ export async function player(uid) {
     </div>
   </div>
   <div class="card" style="margin-top:18px"><div class="card-head"><div><h3>Similar profiles</h3><p class="sub">Closest percentile profiles among ${GROUPS[p.grp].toLowerCase()}s${p.demo ? ' (demo players only)' : ''}.</p></div></div><div class="grid g3" id="sim"></div></div>`);
+  view().insertAdjacentHTML('beforeend', `<div class="card" style="margin-top:18px"><h3>Involvement metrics</h3><p class="sub">Minutes, goals, assists, shots, xG and on-ball actions.</p><div class="tbl-wrap">${involvementTable([p])}</div></div>`);
   pizza($('#pz'), keys, p.p, p.v, { W: 560 });
   $('#pl').innerHTML = ['att', 'pos', 'def', 'gk'].map(c => { const ks = keys.filter(k => METRICS[k].cat === c); if (!ks.length) return '';
     return `<p class="kicker" style="margin:14px 0 6px;color:${CAT[c][1]}">${CAT[c][0]}</p>` + ks.map(k => `<div class="pctl"><span>${METRICS[k].l}</span><span class="val">${fmt(p.v[k], METRICS[k].d)}${METRICS[k].pct ? '%' : ''}</span><div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1"><i style="width:${p.p[k]}%;background:${CAT[c][1]}"></i></div><span class="pv">${p.p[k]}</span></div></div>`).join(''); }).join('');
@@ -385,6 +386,7 @@ export async function compare(a, b) {
       <div class="card"><div class="legend-row" style="justify-content:center;margin-bottom:6px"><span><i style="background:${ca}"></i>${esc(A.n)}</span><span><i style="background:${cb}"></i>${esc(B.n)}</span></div><div class="chart" id="rad"></div></div>
       <div class="card"><h3>Per 90 head to head</h3><p class="sub">${esc(A.n)}: ${GROUPS[A.grp]}, ${labName(A.lab)}, ${A.min.toLocaleString()}′ · ${esc(B.n)}: ${GROUPS[B.grp]}, ${labName(B.lab)}, ${B.min.toLocaleString()}′</p><div class="mirror" id="mir"></div></div>
     </div>
+    <div class="card" style="margin-top:18px"><h3>Involvement, side by side</h3><p class="sub">Totals and per-90 involvement metrics.</p><div class="tbl-wrap">${involvementTable([A, B])}</div></div>
     <div class="grid g2" style="margin-top:18px"><div class="card"><h3>${esc(A.n)}</h3><p class="sub">Shot map${A.demo ? ' (demo)' : ''}</p><div class="chart" id="sa"></div></div><div class="card"><h3>${esc(B.n)}</h3><p class="sub">Shot map${B.demo ? ' (demo)' : ''}</p><div class="chart" id="sb"></div></div></div>`;
     radar($('#rad'), keys, [{ name: A.n, color: ca, p: A.p }, { name: B.n, color: cb, p: B.p }], { W: 520 });
     $('#mir').innerHTML = mk.map(k => { const va = A.v[k], vb = B.v[k], mx = Math.max(va, vb) || 1; const d = METRICS[k].d;
@@ -393,6 +395,13 @@ export async function compare(a, b) {
   };
   go();
 }
+
+
+const TOTROWS = [['Minutes', p => p.min.toLocaleString()], ['Appearances', p => p.apps], ['Goals', p => p.tot.g], ['Non-penalty goals', p => p.tot.npg], ['Assists', p => p.tot.ast],
+  ['Shots (non-penalty)', p => p.tot.sh], ['xG', p => fmt(p.tot.xg, 2)], ['npxG', p => fmt(p.tot.npxg, 2)], ['xA', p => fmt(p.tot.xa, 2)],
+  ['Key passes / 90', p => fmt(p.v.kp, 2)], ['Box receptions / 90', p => fmt(p.v.tbox, 2)], ['Progressive passes / 90', p => fmt(p.v.prog, 2)], ['Pressures / 90', p => fmt(p.v.prs, 1)], ['Ball recoveries / 90', p => fmt(p.v.rec, 2)]];
+export const involvementTable = (ps) => `<table class="tbl"><thead><tr><th class="l" scope="col">Metric</th>${ps.map(p => `<th scope="col">${esc(p.n)}</th>`).join('')}</tr></thead><tbody>${TOTROWS.map(([l, f]) => `<tr><td class="l">${l}</td>${ps.map(p => `<td>${f(p)}</td>`).join('')}</tr>`).join('')}</tbody></table>
+  <p class="sub" style="margin-top:10px">${ps.some(p => p.demo) ? 'Demo players are synthetic. ' : ''}Season totals and per-90s computed from StatsBomb Open Data events (historical: ${[...new Set(ps.map(p => labName(p.lab)))].join(', ')}). StatsBomb xG.</p>`;
 
 /* ---------------- ABOUT ---------------- */
 export async function about() {
@@ -403,6 +412,7 @@ export async function about() {
   <h3>Data sources</h3>
   <table><tr><th>What</th><th>Source</th><th>Status</th></tr>
   <tr><td>Fixtures, results, tables, form, points races (2025/26 and 2026/27, all six leagues)</td><td><a href="https://github.com/openfootball/football.json">openfootball/football.json</a>, CC0-1.0 public domain</td><td><span class="chip real">Real</span></td></tr>
+  <tr><td>La Liga 2026/27 latest scores, kick-off dates and goal scorers (Barça post-match pages), refreshed every 30 min on match days / hourly otherwise by GitHub Actions</td><td><a href="https://www.espn.com/soccer/league/_/name/esp.1">ESPN public scoreboard JSON</a> (keyless). Optional fallback: <a href="https://www.football-data.org">football-data.org</a> free tier when a repository secret is configured</td><td><span class="chip real">Real</span></td></tr>
   <tr><td>Shots, xG, xPts, PPDA, field tilt, player per-90s and percentiles: La Liga, Serie A, Ligue 1 2015/16; Bundesliga 2023/24 (Bayer Leverkusen matches only)</td><td><a href="https://github.com/statsbomb/open-data">StatsBomb Open Data</a>, used under the StatsBomb Public Data User Agreement for non-commercial analysis, with attribution</td><td><span class="chip real">Real</span></td></tr>
   <tr><td>Eredivisie and Liga Portugal player labs (players, per-90s, shots)</td><td>Generated by <code>scripts/build_lab.py</code> with a fixed seed. Names are invented.</td><td><span class="demo-chip">Demo data</span></td></tr></table>
   <p>The Event Lab seasons differ from the live-results seasons because StatsBomb only releases selected historical seasons openly. Each page names its season.</p>

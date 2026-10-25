@@ -1,5 +1,6 @@
 import { LEAGUES, LAB_LEAGUE, players, esc } from './data.js';
 import * as V from './views.js';
+import * as X from './extra.js';
 const $ = s => document.querySelector(s);
 // league nav
 $('#leagueNav').innerHTML = Object.entries(LEAGUES).map(([c, L]) => `<a href="#/league/${c}/2026-27" data-c="${c}" style="--c:${L.c}"><i></i>${L.name}</a>`).join('');
@@ -22,6 +23,8 @@ async function route() {
         case 'players': return V.explorer();
         case 'compare': return V.compare(parts[1], parts[2]);
         case 'about': return V.about();
+        case 'barca': code = 'es'; return parts[1] ? X.barcaMatch(parts[1]) : X.barcaList();
+        case 'clasico-2015': code = 'es'; return X.clasico();
         default: return V.notFound();
       }
     };
@@ -32,6 +35,10 @@ async function route() {
   } catch (e) {
     console.error(e.stack); document.getElementById('view').innerHTML = `<div class="empty"><h2>Something went wrong.</h2><p class="mono small">${esc(e.message)}</p></div>`;
   }
+  const hist = { lab: 1, player: 1, players: 1, compare: 1, 'clasico-2015': 1 }[parts[0]];
+  const seasonLbl = parts[0] === 'lab' ? V.labName(parts[1]) : parts[0] === 'clasico-2015' ? 'La Liga 2015/16' : 'La Liga, Serie A, Ligue 1 2015/16 · Bundesliga 2023/24';
+  try { await X.updatedStrip(hist ? 'hist' : (parts[0] === 'barca' || (code === 'es' && parts[0] !== 'lab') || !parts[0]) ? 'es' : 'other', seasonLbl); } catch (e) { console.error(e); }
+  setTimeout(X.addExportButtons, 1200);
   markNav(code, path);
   document.title = (document.querySelector('#view h1')?.textContent.trim() || 'Football Lab').replace(/\s+/g, ' ') + ' · Football Lab';
   window.scrollTo({ top: 0, behavior: 'instant' });
