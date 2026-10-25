@@ -64,3 +64,6 @@ SB_DIR=path/to/that/dir python3 scripts/build_lab.py   # aggregates, percentiles
 Inspired by football-visual sites such as DataMB, but independent: it uses none of their code, images or data. There are no betting or odds features.
 
 Code: MIT © Joseph Bepo. Data stays under its respective licenses.
+
+## Video clips
+The `video/` folder is a Remotion project that renders animated MP4 clips from the site data. See [video/README.md](video/README.md). Remotion is free for teams of 3 or fewer.
