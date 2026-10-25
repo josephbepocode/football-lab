@@ -1,30 +1,50 @@
-name: Refresh results
+name: Refresh data and deploy
 on:
   schedule:
     - cron: '*/30 10-23 * * 5,6,0,1'   # match days (Fri-Mon) every 30 min, 10:00-23:59 UTC
-    - cron: '7 * * * 2,3,4'            # midweek hourly (catches midweek rounds)
+    - cron: '7 * * * 2,3,4'            # midweek hourly
     - cron: '7 0-9 * * 5,6,0,1'        # match-day nights hourly
+  push:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: write
+  pages: write
+  id-token: write
 concurrency: { group: refresh, cancel-in-progress: false }
 jobs:
-  refresh:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
+      - run: pip install --quiet pillow
       - name: openfootball base (all leagues)
         run: python3 scripts/build_results.py
-      - name: La Liga near-live overlay (ESPN keyless; football-data.org if secret set)
+      - name: La Liga near-live overlay (ESPN keyless; football-data.org only if secret set)
         env:
           FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
         run: python3 scripts/build_live.py
-      - name: Commit if changed
+      - name: Barça match details, fixtures, weekly + RSS (ESPN summaries cached in data/espn)
+        run: python3 scripts/build_barca.py
+      - name: Commit only real data changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/results data/live
+          git add data feed.xml
           git diff --cached --quiet || (git commit -m "Refresh La Liga data (openfootball + ESPN)" && git pull --rebase && git push)
+      - name: Build site + link-preview stubs and og:images
+        run: |
+          mkdir _site && cp -r index.html feed.xml .nojekyll assets data vendor _site/
+          python3 scripts/build_previews.py _site
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: _site }
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: '${{ steps.d.outputs.page_url }}' }
+    steps:
+      - id: d
+        uses: actions/deploy-pages@v4

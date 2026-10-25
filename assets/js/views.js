@@ -31,7 +31,7 @@ export async function home() {
       <p class="kicker">Six leagues · tables · shot maps · percentiles</p>
       <h1>Football,<br><em>measured.</em></h1>
       <p class="lead">An analytics lab for La Liga, Bundesliga, Serie A, Ligue 1, Eredivisie and Liga Portugal. Live tables and form from open results data, and event-level shot maps and percentile profiles from StatsBomb's open data.</p>
-      <div class="hero-cta"><a class="btn primary" href="#/league/es/2026-27">Explore the leagues →</a><a class="btn" href="#/barca">Barça post-match</a><a class="btn" href="#/clasico-2015">Clásico 2015 shot map</a><a class="btn" href="#/compare">Compare players</a><a class="btn" href="#/about">How it's built</a></div>
+      <div class="hero-cta"><a class="btn primary" href="#/league/es/2026-27">Explore the leagues →</a><a class="btn" href="#/barca">Barça post-match</a><a class="btn" href="#/fixtures">Barça fixtures</a><a class="btn" href="#/weekly">Barça in numbers</a><a class="btn" href="#/clasico-2015">Clásico 2015 shot map</a><a class="btn" href="#/compare">Compare players</a><a class="btn" href="#/about">How it's built</a></div>
       <div class="hero-stats">
         <div><b data-count="${played}">0</b><span>real results, 2025/26 + 2026/27</span></div>
         <div><b data-count="${shots}">0</b><span>real shots with xG</span></div>

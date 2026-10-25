@@ -152,3 +152,5 @@ select:focus,.input:focus{border-color:var(--acc)}select option{background:#1114
 .png-btn{position:absolute;top:14px;right:14px;z-index:2;font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid var(--line2);background:rgba(255,255,255,.05);color:var(--mute);cursor:pointer}.png-btn:hover{color:var(--text);border-color:var(--acc)}
 .goals{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px;font-size:14px}.goals b{font-family:var(--fm);color:var(--acc);margin-right:6px}
 a.res{color:inherit;text-decoration:none}a.res:hover{border-color:var(--line2)}
+.share-btn{position:absolute;top:14px;right:88px;z-index:2;font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid var(--line2);background:rgba(255,255,255,.05);color:var(--mute);cursor:pointer}.share-btn:hover{color:var(--text);border-color:var(--acc)}
+.xi{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:4px;font-size:13px}.xi .mono{display:inline-block;min-width:26px;color:var(--mute)}.subi{color:var(--win)}.subo{color:var(--loss)}

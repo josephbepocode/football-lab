@@ -16,6 +16,13 @@ def norm(s):
     return re.sub(r'[^a-z]+', '', s)
 ALIAS = {'atleticomadrid': 'atleticomadrid', 'athleticbilbao': 'athletic', 'athleticclub': 'athletic', 'celta': 'celtavigo',
          'deportivolacoruna': 'deportivo', 'rayo': 'rayovallecano', 'racingsantander': 'racingsantander'}
+def jdump(p, o):
+    try: old = json.load(open(p))
+    except Exception: old = None
+    strip = lambda x: {k: v for k, v in x.items() if k != 'updated'} if isinstance(x, dict) else x
+    if strip(old) == strip(o): return
+    json.dump(o, open(p, 'w'), ensure_ascii=False, separators=(',', ':'))
+PREV = (lambda: json.load(open('data/live/meta.json')).get('updated') if os.path.exists('data/live/meta.json') else None)()
 d = json.load(open(PATH)); teams = d['teams']
 def key(s): k = norm(s); return ALIAS.get(k, k)
 TK = {}
@@ -87,10 +94,10 @@ stamp = now.strftime('%Y-%m-%dT%H:%M:%SZ')
 played = [m for m in d['matches'] if len(m) >= 6]
 d.update(played=len(played), lastDate=max((m[0] for m in played), default=None), updated=stamp,
          source='openfootball/football.json (CC0-1.0) + ' + ' + '.join(used))
-json.dump(d, open(PATH, 'w'), ensure_ascii=False, separators=(',', ':'))
+jdump(PATH, d)
 ix = json.load(open('data/results/index.json')); ix['updated'] = stamp
 ix['sets'][f'{SEASON}_es'] = {'played': d['played'], 'total': d['total'], 'lastDate': d['lastDate']}
-json.dump(ix, open('data/results/index.json', 'w'), separators=(',', ':'))
+jdump('data/results/index.json', ix)
 # ---- standings helper (same rules as the site: pts, GD, GF)
 def table(ms):
     T = {i: [0, 0, 0] for i in range(len(teams))}
@@ -101,7 +108,7 @@ def table(ms):
     order = sorted(T, key=lambda i: (-T[i][0], -T[i][1], -T[i][2], teams[i]['short']))
     return {i: {'pos': k + 1, 'pts': T[i][0]} for k, i in enumerate(order)}
 live = sorted(events.values(), key=lambda e: e['kickoff'])
-json.dump({'updated': stamp, 'sources': used, 'teams': [t['short'] for t in teams], 'events': live}, open('data/live/es.json', 'w'), ensure_ascii=False, separators=(',', ':'))
+jdump('data/live/es.json', {'updated': stamp, 'sources': used, 'teams': [t['short'] for t in teams], 'events': live})
 B = next(i for i, t in enumerate(teams) if t['id'] == 'barcelona')
 chron = sorted(played, key=lambda m: m[0]); reports = []
 for m in chron:
@@ -113,6 +120,10 @@ for m in chron:
                     'before': before[B] if any(x[0] < m[0] for x in chron) else None, 'after': after[B],
                     'leaderAfter': teams[next(i for i, v in after.items() if v['pos'] == 1)]['short'],
                     'note': 'Table positions use points, goal difference, goals scored, computed from all results up to and including this date.'})
-json.dump({'updated': stamp, 'matches': reports[::-1]}, open('data/live/barca.json', 'w'), ensure_ascii=False, separators=(',', ':'))
-json.dump({'updated': stamp, 'sources': used, 'scoresChanged': filled}, open('data/live/meta.json', 'w'), separators=(',', ':'))
+jdump('data/live/barca.json', {'updated': stamp, 'matches': reports[::-1]})
+import subprocess
+changed = subprocess.run(['git', 'status', '--porcelain', 'data/results', 'data/live'], capture_output=True, text=True).stdout.strip()
+# meta 'updated' = last time any data actually changed (so the site never claims an update that didn't happen)
+json.dump({'updated': stamp if (changed or not PREV) else PREV, 'checked': stamp, 'sources': used}, open('data/live/meta.json.tmp', 'w'))
+os.replace('data/live/meta.json.tmp', 'data/live/meta.json') if (changed or not PREV) else os.remove('data/live/meta.json.tmp')
 print('updated', stamp, 'sources', used, 'scores changed', filled, 'played', len(played), 'barca reports', len(reports))

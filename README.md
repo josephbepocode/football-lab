@@ -24,6 +24,15 @@ It's a static site: vanilla ES modules, [D3 v7](https://d3js.org) for every char
 - **PNG export** on every chart, credited "Football Lab · bepojoseph.xyz" plus the data source.
 - **Player involvement tables** on player pages and side by side on Compare (StatsBomb, historical).
 
+### Round 2
+- **Barça match pages**: shot timeline by minute (ESPN commentary), match stats (ESPN box score), lineups, formations and substitutions. ESPN summaries are cached in `data/espn/`; if ESPN changes format the panels hide rather than show wrong numbers.
+- **Clásico 2015 xG flow** (StatsBomb, labelled historical).
+- **Share cards**: one-click 1200×675 PNG per chart with title, context line, data credit, StatsBomb logo where StatsBomb data is used, `@NorthCuler` and `Football Lab · bepojoseph.xyz`. Nothing is posted anywhere automatically.
+- **Link previews**: the Action builds `/p/<view>/` stub pages with `og:image` / `twitter:card=summary_large_image` and a generated 1200×675 PNG, redirecting to the hash route (e.g. `/p/barca/<match>/`, `/p/player/<id>/`, `/p/weekly/<week>/`). These are built at deploy time, not committed. Pages now deploys from GitHub Actions.
+- **Fixtures** (`#/fixtures`) with a transparent difficulty rating: `1 + 4 × min(1, 0.6 × position score + 0.3 × form score + venue)`.
+- **Barça in numbers** (`#/weekly`), weekly archive and RSS at `feed.xml`.
+- The data job commits only when data actually changes.
+
 ## Data: what's real and what's demo
 | Data | Source | Status |
 |---|---|---|

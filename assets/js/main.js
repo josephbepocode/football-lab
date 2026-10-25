@@ -24,6 +24,8 @@ async function route() {
         case 'compare': return V.compare(parts[1], parts[2]);
         case 'about': return V.about();
         case 'barca': code = 'es'; return parts[1] ? X.barcaMatch(parts[1]) : X.barcaList();
+        case 'fixtures': code = 'es'; return X.fixtures();
+        case 'weekly': code = 'es'; return X.weekly(parts[1]);
         case 'clasico-2015': code = 'es'; return X.clasico();
         default: return V.notFound();
       }
@@ -37,7 +39,7 @@ async function route() {
   }
   const hist = { lab: 1, player: 1, players: 1, compare: 1, 'clasico-2015': 1 }[parts[0]];
   const seasonLbl = parts[0] === 'lab' ? V.labName(parts[1]) : parts[0] === 'clasico-2015' ? 'La Liga 2015/16' : 'La Liga, Serie A, Ligue 1 2015/16 · Bundesliga 2023/24';
-  try { await X.updatedStrip(hist ? 'hist' : (parts[0] === 'barca' || (code === 'es' && parts[0] !== 'lab') || !parts[0]) ? 'es' : 'other', seasonLbl); } catch (e) { console.error(e); }
+  try { await X.updatedStrip(hist ? 'hist' : (['barca', 'fixtures', 'weekly'].includes(parts[0]) || (code === 'es' && parts[0] !== 'lab') || !parts[0]) ? 'es' : 'other', seasonLbl); } catch (e) { console.error(e); }
   setTimeout(X.addExportButtons, 1200);
   markNav(code, path);
   document.title = (document.querySelector('#view h1')?.textContent.trim() || 'Football Lab').replace(/\s+/g, ' ') + ' · Football Lab';
