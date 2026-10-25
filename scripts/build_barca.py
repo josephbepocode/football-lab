@@ -64,6 +64,7 @@ def details(ev, rep):
             ps = [p['athlete']['displayName'] for p in k.get('participants', [])]
             m = re.search(r'\. (.+?) replaces (.+?)\.?$', k.get('text', ''))
             on, off = (m.groups() if m else (ps + [None, None])[:2])
+            off = re.sub(r' because of an? .*$', '', off or '') or None
             subs.append({'min': k.get('clock', {}).get('displayValue', ''), 'side': side_of(k.get('team', {}).get('displayName')), 'on': on, 'off': off})
     out = {'id': rep['id'], 'espnId': ev['id'], 'home': home, 'away': away, 'shots': shots, 'stats': teams, 'lineups': lineups, 'subs': subs,
            'source': 'ESPN public match summary (cached ' + s.get('fetched', '') + ')', 'updated': now.strftime('%Y-%m-%dT%H:%M:%SZ')}
